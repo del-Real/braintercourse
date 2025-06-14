@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "raylib.h"
+//#include "raylib.h"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -7,12 +7,20 @@
 
 #define ARRAY_SIZE 30000
 
-int main(void) {
+int main(int argc, char **argv) {
     char memArray[ARRAY_SIZE] = {0}; // Memory array
     int dataPtr = 0; // Memory pointer (points to the current cell in the memory array)
     int instPtr = 0; // Program counter (points to current instruction in the program)
+    char *input;
 
-    char *input = "+++++++++++++++++++++++++++++++++[.>+<-]";
+    if (argc == 1) {
+        static char buffer[1000];  // Or malloc if you prefer
+        printf("Enter program:\n");
+        fgets(buffer, sizeof(buffer), stdin);
+        input = buffer;
+    } else {
+        input = argv[1];
+    }
 
     // Main interpreter loop
     while (input[instPtr] != '\0') {
@@ -90,5 +98,6 @@ int main(void) {
 
         CloseWindow();
     */
+
     return 0;
 }
