@@ -26,7 +26,10 @@ if (NOT raylib_FOUND)  # If there's none, fetch and build raylib
 endif()
 
 # Create the executable from your source files
-add_executable(braintercourse braintercourse.c)
+add_executable(braintercourse braintercourse.c
+        renderer.c
+        braintercourse.h
+        renderer.h)
 
 # Link raylib to your executable
 target_link_libraries(braintercourse raylib)

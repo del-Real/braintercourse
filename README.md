@@ -1,2 +1,2 @@
 # braintercourse
-A Brainfuck Interpreter Visualizer
+Brainfuck Interpreter Visualizer made with [Raylib](https://www.raylib.com/)
