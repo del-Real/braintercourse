@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)  # FetchContent is available in 3.11+
 project(braintercourse C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 
 # Generate compile_commands.json for better IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "raylib.h"
+#include <string.h>
 #include "braintercourse.h"
 #include "renderer.h"
 
@@ -9,17 +9,16 @@ int main(int argc, char **argv) {
     int dataPtr = 0; // Memory pointer (points to the current cell in the memory array)
     int instPtr = 0; // Program counter (points to current instruction in the program)
     char *input; // Input program
-
-    InitRenderer();
-    RunRenderLoop();
+    char *output; // Output program
 
     // Get input
-    if (argc == 1) {
+    if (argc == 2) {
+        input = argv[1];
+    } else {
         static char buffer[BUFFER_SIZE];
-        printf("Enter program:\n");
+        printf("Enter program:\n"); // request input
         fgets(buffer, sizeof(buffer), stdin);
         input = buffer;
-    } else {
         input = argv[1];
     }
 
@@ -36,6 +35,8 @@ int main(int argc, char **argv) {
          * '.' - Output current cell as ASCII (similar to putchar() in C)
          * ',' - Read input byte into current cell (similar to getchar() in C)
          */
+
+        // Evaluate instruction
         switch (input[instPtr]) {
             case '>':
                 if (dataPtr < ARRAY_SIZE - 1) {
@@ -61,6 +62,7 @@ int main(int argc, char **argv) {
                 break;
             case '[':
                 if (memArray[dataPtr] == 0) {
+                    // Process nested loops
                     int bracketCount = 1;
                     while (bracketCount > 0) {
                         instPtr++;
@@ -74,6 +76,7 @@ int main(int argc, char **argv) {
                 break;
             case ']':
                 if (memArray[dataPtr] != 0) {
+                    // Process nested loops
                     int bracketCount = 1;
                     while (bracketCount > 0) {
                         instPtr--;
@@ -87,6 +90,9 @@ int main(int argc, char **argv) {
                 break;
             case '.':
                 putchar(memArray[dataPtr]);
+                int len = strlen(output);
+                output[len] = memArray[dataPtr];
+                output[len + 1] = '\0';
                 fflush(stdout);
                 break;
             case ',':
@@ -95,6 +101,9 @@ int main(int argc, char **argv) {
         }
         instPtr++;
     }
+
+    // Initialize and run renderer
+    RunRenderer(input, memArray, output);
 
     return 0;
 }
