@@ -1,7 +1,5 @@
 #include "renderer.h"
 
-#include <stdio.h>
-
 void InitRenderer(void) {
     SetTraceLogLevel(LOG_ERROR); // print only error log
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "braintercourse  -  Brainfuck Interpreter Visualizer");
@@ -15,11 +13,9 @@ void RunRenderer(char *input, char memArray[], char *output) {
 
     // Get input length
     size_t inputLength = strlen(input) - 1;
-    printf("Input length: %d\n", inputLength); // debug
 
     // Get memory array length
     size_t memLength = strlen(memArray);
-    printf("Memory array length: %d\n", memLength); // debug
 
     // Initialize renderer
     InitRenderer();
@@ -45,8 +41,12 @@ void RunRenderer(char *input, char memArray[], char *output) {
         for (int i = 0; i < inputLength; i++) {
             DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 6, SQUARE_SIZE, SQUARE_SIZE, grayMatter);
             DrawRectangleLines(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 6, SQUARE_SIZE, SQUARE_SIZE, BLACK);
+
+            // Draw indexes
             DrawText(TextFormat("%i", i), SCREEN_WIDTH / 4 + 76 / 2 + 76 * i, SCREEN_HEIGHT / 6 + SQUARE_SIZE + 10, 10,
                      DARKGRAY);
+
+            // Draw input values
             DrawText(TextFormat("%c", input[i]), SCREEN_WIDTH / 4 + 60 / 2 + 76 * i, SCREEN_HEIGHT / 6 + SQUARE_SIZE - 55, 40,
                      BLACK);
         }
@@ -68,8 +68,12 @@ void RunRenderer(char *input, char memArray[], char *output) {
         for (int i = 0; i < memLength; i++) {
             DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2, SQUARE_SIZE, SQUARE_SIZE, grayMatter);
             DrawRectangleLines(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2, SQUARE_SIZE, SQUARE_SIZE, BLACK);
+
+            // Draw indexes
             DrawText(TextFormat("%i", i), SCREEN_WIDTH / 4 + 76 / 2 + 76 * i, SCREEN_HEIGHT / 2 + SQUARE_SIZE + 10, 10,
                      DARKGRAY);
+
+            // Draw memory array values
             DrawText(TextFormat("%i", memArray[i]), SCREEN_WIDTH / 4 + 20 / 2 + 76 * i, SCREEN_HEIGHT / 2 + SQUARE_SIZE - 55, 40,
                      BLACK);
         }
@@ -87,12 +91,11 @@ void RunRenderer(char *input, char memArray[], char *output) {
         DrawText(outputText, SCREEN_WIDTH / 2 - (outputTextSize.x / 2),SCREEN_HEIGHT - 125,
                  TITLE_FONT_SIZE, DARKGRAY);
 
-        // Output
-        //const char *output = "Hello World";
-        Vector2 outputSize =
+        // Output value
+         Vector2 outputValueSize =
                 MeasureTextEx(GetFontDefault(), output, 30, 1);
 
-        DrawText(output, SCREEN_WIDTH / 2 - (outputSize.x / 2),SCREEN_HEIGHT - 85,
+        DrawText(output, SCREEN_WIDTH / 2 - (outputValueSize.x / 2),SCREEN_HEIGHT - 85,
                  30, BLACK);
 
         EndDrawing();

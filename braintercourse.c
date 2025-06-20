@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     int dataPtr = 0; // Memory pointer (points to the current cell in the memory array)
     int instPtr = 0; // Program counter (points to current instruction in the program)
     char *input; // Input program
-    char *output; // Output program
+    char output[BUFFER_SIZE] = {0}; // Output buffer
 
     // Get input
     if (argc == 2) {
@@ -89,11 +89,10 @@ int main(int argc, char **argv) {
                 }
                 break;
             case '.':
-                putchar(memArray[dataPtr]);
+                // Assign value to output
                 int len = strlen(output);
                 output[len] = memArray[dataPtr];
                 output[len + 1] = '\0';
-                fflush(stdout);
                 break;
             case ',':
                 memArray[dataPtr] = getchar();
@@ -101,6 +100,9 @@ int main(int argc, char **argv) {
         }
         instPtr++;
     }
+
+    // Print output
+    printf("%s", output);
 
     // Initialize and run renderer
     RunRenderer(input, memArray, output);
