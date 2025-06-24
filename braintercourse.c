@@ -10,37 +10,42 @@ int main(int argc, char **argv) {
     int instPtr = 0; // Program counter (points to current instruction in the program)
     char *input; // Input program
     char output[BUFFER_SIZE] = {0}; // Output buffer
+    int maxDataPtr = 0; // Track highest memory position used
 
     // Get input
     if (argc == 2) {
         input = argv[1];
+    } else if (argc > 2) {
+        fprintf(stderr, "Usage:\n\t./braintercourse\n\t./braintercourse <brainfuck program>\n");
     } else {
         static char buffer[BUFFER_SIZE];
         printf("Enter program:\n"); // request input
         fgets(buffer, sizeof(buffer), stdin);
         input = buffer;
-        input = argv[1];
     }
 
-    // Main interpreter loop
+    /* ----------------------------------------------------------------------------------
+     * MAIN INTERPRETER LOOP
+     * ----------------------------------------------------------------------------------
+     * Operation rules:
+     * '>' - Move data pointer 1 block to the right
+     * '<' - Move data pointer 1 block to the left
+     * '+' - Increment value stored in current cell
+     * '-' - Decrement value stored in current cell
+     * '[' - Jump forward past matching ']' if current cell == 0
+     * ']' - Jump back after matching '[' if current cell != 0
+     * '.' - Output current cell as ASCII (similar to putchar() in C)
+     * ',' - Read input byte into current cell (similar to getchar() in C)
+     */
     while (input[instPtr] != '\0') {
-        /*
-         * OPERATION RULES:
-         * '>' - Move data pointer 1 block to the right
-         * '<' - Move data pointer 1 block to the left
-         * '+' - Increment value stored in current cell
-         * '-' - Decrement value stored in current cell
-         * '[' - Jump forward past matching ']' if current cell == 0
-         * ']' - Jump back after matching '[' if current cell != 0
-         * '.' - Output current cell as ASCII (similar to putchar() in C)
-         * ',' - Read input byte into current cell (similar to getchar() in C)
-         */
-
         // Evaluate instruction
         switch (input[instPtr]) {
             case '>':
                 if (dataPtr < ARRAY_SIZE - 1) {
                     dataPtr++;
+                    if (dataPtr > maxDataPtr) {
+                        maxDataPtr = dataPtr; // Track highest position
+                    }
                 } else {
                     fprintf(stderr, "Memory overflow error caused by '>'\n");
                     exit(1);
@@ -105,7 +110,7 @@ int main(int argc, char **argv) {
     printf("%s", output);
 
     // Initialize and run renderer
-    RunRenderer(input, memArray, output);
+    RunRenderer(input, memArray, maxDataPtr + 1, output);
 
     return 0;
 }

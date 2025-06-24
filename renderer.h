@@ -9,6 +9,6 @@
 #define SCREEN_FPS 60
 
 void InitRenderer(void);
-void RunRenderer(char* input, char memArray[], char *output);
+void RunRenderer(char* input, char memArray[], int memLength, char *output);
 
 #endif
