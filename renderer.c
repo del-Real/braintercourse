@@ -1,9 +1,32 @@
 #include "renderer.h"
+#include <math.h>
 
 void InitRenderer(void) {
     SetTraceLogLevel(LOG_ERROR); // print only error log
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "braintercourse  -  Brainfuck Interpreter Visualizer");
     SetTargetFPS(SCREEN_FPS);
+}
+
+void MoveCamera(Camera2D *camera, Rectangle *player) {
+    // Target movement
+    if (IsKeyDown(KEY_W)) {
+        player->y -= 6;
+    } else if (IsKeyDown(KEY_D)) {
+        player->x += 6;
+    } else if (IsKeyDown(KEY_S)) {
+        player->y += 6;
+    } else if (IsKeyDown(KEY_A)) {
+        player->x -= 6;
+    }
+
+    // Camera target follows player
+    camera->target = (Vector2){player->x + 20, player->y + 20};
+
+    // Camera zoom controls (uses log scaling to provide consistent zoom speed)
+    camera->zoom = expf(logf(camera->zoom) + ((float) GetMouseWheelMove() * 0.1f));
+
+    if (camera->zoom > 1.0f) camera->zoom = 1.0f;
+    else if (camera->zoom < 0.5f) camera->zoom = 0.5f;
 }
 
 void RunRenderer(char *input, char memArray[], int memLength, char *output) {
@@ -14,11 +37,19 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
     int SQUARE_SIZE = 75;
 
     // Custom colors
-    Color grayMatter = (Color){180, 150, 140, 255};
-    Color whiteMatter = (Color){220, 200, 190, 255};
+    Color cellColor = (Color){247, 114, 69, 255}; // #F77245 - Warm orange
+    Color bgColor = (Color){238, 230, 212, 255}; // Midtone between beige and cream
 
     // Get input length
     size_t inputLength = strlen(input);
+
+    Rectangle player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 10, 10};
+
+    Camera2D camera = {player.x + 20.0f, player.y + 20.0f};
+    //camera.target = (Vector2){0};
+    camera.offset = (Vector2){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 
     InitRenderer(); // Initialize renderer
 
@@ -26,9 +57,19 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
     // MAIN RENDERING LOOP
     //----------------------------------------------------------------------------------
     while (!WindowShouldClose()) {
-        BeginDrawing();
+        // ---------------
+        // CAMERA
+        // ---------------
+        MoveCamera(&camera, &player);
 
-        ClearBackground(whiteMatter);
+        // ---------------
+        // DRAW
+        // ---------------
+        BeginDrawing();
+        ClearBackground(bgColor);
+        BeginMode2D(camera);
+
+        DrawRectangleRec(player, RED);
 
         //----------------------------------------------------------------------------------
         // Input
@@ -41,20 +82,26 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         DrawText(inputText, SCREEN_WIDTH / 2 - (inputTextSize.x / 2),SCREEN_HEIGHT / 10,
                  TITLE_FONT_SIZE, DARKGRAY);
 
-        // Draw input Array
+        // Draw input array
         for (int i = 0; i < inputLength; i++) {
             // Draw cells
-            DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 6, SQUARE_SIZE, SQUARE_SIZE, grayMatter);
-            DrawRectangleLines(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 6, SQUARE_SIZE, SQUARE_SIZE, BLACK);
+            DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 6, SQUARE_SIZE, SQUARE_SIZE, cellColor);
+            DrawRectangleLines(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 6, SQUARE_SIZE, SQUARE_SIZE,
+                               bgColor);
 
             // Draw indexes
-            DrawText(TextFormat("%i", i), SCREEN_WIDTH / 4 + (SQUARE_SIZE + 1) / 2 + (SQUARE_SIZE + 1) * i,
+            DrawText(TextFormat("%i", i), SCREEN_WIDTH / 4 + SQUARE_SIZE * i + (SQUARE_SIZE / 2),
                      SCREEN_HEIGHT / 6 + SQUARE_SIZE + 10, INDEX_FONT_SIZE,
                      DARKGRAY);
 
-            // Draw input values
-            DrawText(TextFormat("%c", input[i]), SCREEN_WIDTH / 4 + 65 / 2 + (SQUARE_SIZE + 1) * i,
-                     SCREEN_HEIGHT / 6 + SQUARE_SIZE - 50, VALUE_FONT_SIZE,
+            // Get input array values
+            const char *inputValueStr = TextFormat("%c", (int) input[i]);
+            Vector2 inputValueSize = MeasureTextEx(GetFontDefault(), inputValueStr, VALUE_FONT_SIZE, 1);
+
+            // Center value in each cell
+            int cellCenterX = SCREEN_WIDTH / 4 + SQUARE_SIZE * i + (SQUARE_SIZE / 2);
+            DrawText(inputValueStr, cellCenterX - (inputValueSize.x / 2), SCREEN_HEIGHT / 6 + SQUARE_SIZE - 50,
+                     VALUE_FONT_SIZE,
                      BLACK);
         }
 
@@ -77,11 +124,12 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         // Draw memory array
         for (int i = 0; i < memLength; i++) {
             // Draw cells
-            DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2, SQUARE_SIZE, SQUARE_SIZE, grayMatter);
-            DrawRectangleLines(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2, SQUARE_SIZE, SQUARE_SIZE, BLACK);
+            DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2, SQUARE_SIZE, SQUARE_SIZE, cellColor);
+            DrawRectangleLines(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2, SQUARE_SIZE, SQUARE_SIZE,
+                               bgColor);
 
             // Draw indexes
-            DrawText(TextFormat("%i", i), SCREEN_WIDTH / 4 + (SQUARE_SIZE + 1) / 2 + 76 * i,
+            DrawText(TextFormat("%i", i), SCREEN_WIDTH / 4 + SQUARE_SIZE * i + (SQUARE_SIZE / 2),
                      SCREEN_HEIGHT / 2 + SQUARE_SIZE + 10, INDEX_FONT_SIZE,
                      DARKGRAY);
 
@@ -112,6 +160,7 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         DrawText(outputText, SCREEN_WIDTH / 2 - (outputTextSize.x / 2),SCREEN_HEIGHT - 125,
                  TITLE_FONT_SIZE, DARKGRAY);
 
+
         // Draw output value
         Vector2 outputValueSize =
                 MeasureTextEx(GetFontDefault(), output, VALUE_FONT_SIZE, 1);
@@ -119,6 +168,9 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         DrawText(output, SCREEN_WIDTH / 2 - (outputValueSize.x / 2),SCREEN_HEIGHT - 85,
                  VALUE_FONT_SIZE, BLACK);
 
+        DrawRectangleLines(100, SCREEN_HEIGHT - 150, SCREEN_WIDTH - 150, 125, BLACK);
+
+        EndMode2D();
         EndDrawing();
     }
 
