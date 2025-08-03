@@ -1,5 +1,4 @@
 #include "renderer.h"
-#include <math.h>
 
 void InitRenderer(void) {
     SetTraceLogLevel(LOG_ERROR); // print only error log
@@ -37,14 +36,15 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
     int SQUARE_SIZE = 75;
 
     // Custom colors
-    Color cellColor = (Color){247, 114, 69, 255}; // #F77245 - Warm orange
-    Color bgColor = (Color){238, 230, 212, 255}; // Midtone between beige and cream
+    Color cellColor = (Color){247, 114, 69, 255};
+    Color bgColor = (Color){238, 230, 212, 255};
 
     // Get input length
     size_t inputLength = strlen(input);
 
-    Rectangle player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 10, 10};
+    Rectangle player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 4, 4};
 
+    // Camera init
     Camera2D camera = {player.x + 20.0f, player.y + 20.0f};
     //camera.target = (Vector2){0};
     camera.offset = (Vector2){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
