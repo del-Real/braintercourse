@@ -90,12 +90,14 @@ int main(int argc, char **argv) {
                     }
                 }
                 break;
-            case '.':
+            case '.': {
                 // Assign value to output
-                int len = strlen(output);
+                int len;
+                len = strlen(output);
                 output[len] = memArray[dataPtr];
                 output[len + 1] = '\0';
                 break;
+            }
             case ',':
                 memArray[dataPtr] = getchar();
                 break;

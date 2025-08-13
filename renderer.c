@@ -8,14 +8,10 @@ void InitRenderer(void) {
 
 void MoveCamera(Camera2D *camera, Rectangle *player) {
     // Target movement
-    if (IsKeyDown(KEY_W)) {
-        player->y -= 6;
+    if (IsKeyDown(KEY_A)) {
+        player->x -= 6;
     } else if (IsKeyDown(KEY_D)) {
         player->x += 6;
-    } else if (IsKeyDown(KEY_S)) {
-        player->y += 6;
-    } else if (IsKeyDown(KEY_A)) {
-        player->x -= 6;
     }
 
     // Camera target follows player
@@ -27,7 +23,6 @@ void MoveCamera(Camera2D *camera, Rectangle *player) {
     if (camera->zoom > 1.0f) camera->zoom = 1.0f;
     else if (camera->zoom < 0.5f) camera->zoom = 0.5f;
 }
-
 void RunRenderer(char *input, char memArray[], int memLength, char *output) {
     // Constant size values
     int TITLE_FONT_SIZE = 20;
@@ -42,10 +37,10 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
     // Get input length
     size_t inputLength = strlen(input);
 
-    Rectangle player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 4, 4};
+    Rectangle tgt = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 4, 4};
 
     // Camera init
-    Camera2D camera = {player.x + 20.0f, player.y + 20.0f};
+    Camera2D camera = {tgt.x + 20.0f, tgt.y + 20.0f};
     //camera.target = (Vector2){0};
     camera.offset = (Vector2){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
     camera.rotation = 0.0f;
@@ -60,7 +55,7 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         // ---------------
         // CAMERA
         // ---------------
-        MoveCamera(&camera, &player);
+        MoveCamera(&camera, &tgt);
 
         // ---------------
         // DRAW
@@ -69,7 +64,7 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         ClearBackground(bgColor);
         BeginMode2D(camera);
 
-        DrawRectangleRec(player, RED);
+        DrawRectangleRec(tgt, bgColor);
 
         //----------------------------------------------------------------------------------
         // Input
