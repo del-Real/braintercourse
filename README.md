@@ -1,5 +1,9 @@
 # braintercourse - Brainfuck Interpreter Visualizer
 
+<div align="center">
+  <img alt="Logo" src="https://github.com/del-Real/braintercourse/blob/main/demo.png" width="600" />
+</div>
+
 A Brainfuck interpreter with real-time visual representation of memory, input, and output. Built with [Raylib](https://www.raylib.com/)
 
 ## Operation rules
