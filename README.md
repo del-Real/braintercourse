@@ -1,4 +1,4 @@
-# braintercourse - Brainfuck Interpreter Visualizer
+# braintercourse
 A Brainfuck interpreter with real-time visual representation of memory, input, and output. Built with [Raylib](https://www.raylib.com/)
 
 
