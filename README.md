@@ -4,7 +4,7 @@ Built with [Raylib](https://www.raylib.com/)
 
 
 <div align="center">
-  <img alt="Logo" src="https://github.com/del-Real/braintercourse/blob/main/demo.png" width="600" />
+  <img alt="Logo" src="https://github.com/del-Real/braintercourse/blob/main/demo.png" width="750" />
 </div>
 
 
