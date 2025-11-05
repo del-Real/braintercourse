@@ -1,9 +1,5 @@
 #pragma once
 
-// Array params
-#define ARRAY_SIZE 30000
-#define BUFFER_SIZE 1000
-
 // Render params
 #define SCREEN_WIDTH 825
 #define SCREEN_HEIGHT 600

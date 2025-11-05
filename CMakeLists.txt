@@ -26,10 +26,15 @@ if (NOT raylib_FOUND)  # If there's none, fetch and build raylib
 endif()
 
 # Create the executable from your source files
-add_executable(braintercourse braintercourse.c
-        braintercourse.h
-        example.cpp
-        config.h
+add_executable(braintercourse
+        src/interpreter.c
+        src/renderer.c
+        include/interpreter.h
+        src/raygui_impl.c
+        include/raygui.h
+        include/renderer.h
+        include/renderer_config.h
+        src/raygui_impl.c
 )
 
 # Link raylib to your executable
@@ -46,7 +51,7 @@ if (WIN32)
     endif()
 endif()
 
-# Checks if OSX and links appropriate frameworks (Only required on MacOS)
+# macOS frameworks
 if (APPLE)
     target_link_libraries(braintercourse "-framework IOKit")
     target_link_libraries(braintercourse "-framework Cocoa")

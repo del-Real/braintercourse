@@ -1,14 +1,13 @@
 #pragma once
 
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
+#include <stdlib.h>
 #include "raylib.h"
-#define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-#include "config.h"
+
+// Array params
+#define ARRAY_SIZE 30000
+#define BUFFER_SIZE 1000
 
 typedef struct {
     char memArray[ARRAY_SIZE];    // Memory array
@@ -19,7 +18,4 @@ typedef struct {
     int maxDataPtr;                // Track highest memory position used
 } InterpreterContext;
 
-void InitRenderer(void);
 void ExecuteInterpreter(InterpreterContext *ctx);
-void RunRenderer(InterpreterContext *ctx);
-void MoveCamera(Camera2D *camera, Rectangle *player);
