@@ -28,6 +28,8 @@ endif()
 # Create the executable from your source files
 add_executable(braintercourse braintercourse.c
         braintercourse.h
+        example.cpp
+        config.h
 )
 
 # Link raylib to your executable

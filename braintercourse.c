@@ -1,31 +1,41 @@
 #include "braintercourse.h"
 
 int main(int argc, char **argv) {
-    char memArray[ARRAY_SIZE] = {0}; // Memory array
-    int dataPtr = 0; // Memory pointer (points to the current cell in the memory array)
-    int instPtr = 0; // Program counter (points to current instruction in the program)
-    char *input; // Input program
-    char output[BUFFER_SIZE] = {0}; // Output buffer
-    int maxDataPtr = 0; // Track highest memory position used
+    // Initialize context struct values
+    InterpreterContext ctx;
+    memset(ctx.memArray, 0, sizeof(ctx.memArray));
+    memset(ctx.output, 0, sizeof(ctx.output));
+    ctx.input = NULL;
+    ctx.instPtr = 0;
+    ctx.dataPtr = 0;
+    ctx.maxDataPtr = 0;
 
     // Get input program
     if (argc == 2) {
-        input = argv[1];
+        ctx.input = argv[1];
     } else if (argc > 2) {
         fprintf(stderr, "Usage:\n\t./braintercourse\n\t./braintercourse <brainfuck program>\n");
     } else {
         static char buffer[BUFFER_SIZE];
         printf("Enter program:\n"); // request input
         fgets(buffer, sizeof(buffer), stdin);
-        input = buffer;
+        ctx.input = buffer;
     }
 
-    // Initialize renderer
+    // Execute interpreter algorithm
+    ExecuteInterpreter(&ctx);
+
+    // Print output
+    printf("%s", ctx.output);
+
+    // Initialize and run (raylib) renderer
     InitRenderer();
+    RunRenderer(&ctx);
 
-    // Run renderer
-    // RunRenderer(input, memArray, maxDataPtr + 1, output);
+    return 0;
+}
 
+void ExecuteInterpreter(InterpreterContext *ctx) {
     /* ----------------------------------------------------------------------------------
      * MAIN INTERPRETER LOOP
      * ----------------------------------------------------------------------------------
@@ -40,14 +50,14 @@ int main(int argc, char **argv) {
      * ',' - Read input byte into current cell (similar to getchar() in C)
      */
 
-    while (input[instPtr] != '\0') {
+    while (ctx->input[ctx->instPtr] != '\0') {
         // Evaluate instruction
-        switch (input[instPtr]) {
+        switch (ctx->input[ctx->instPtr]) {
             case '>':
-                if (dataPtr < ARRAY_SIZE - 1) {
-                    dataPtr++;
-                    if (dataPtr > maxDataPtr) {
-                        maxDataPtr = dataPtr; // Track highest position
+                if (ctx->dataPtr < ARRAY_SIZE - 1) {
+                    ctx->dataPtr++;
+                    if (ctx->dataPtr > ctx->maxDataPtr) {
+                        ctx->maxDataPtr = ctx->dataPtr; // Track highest position
                     }
                 } else {
                     fprintf(stderr, "Memory overflow error caused by '>'\n");
@@ -55,42 +65,42 @@ int main(int argc, char **argv) {
                 }
                 break;
             case '<':
-                if (dataPtr > 0) {
-                    dataPtr--;
+                if (ctx->dataPtr > 0) {
+                    ctx->dataPtr--;
                 } else {
                     fprintf(stderr, "Memory underflow error caused by '<'\n");
                     exit(1);
                 }
                 break;
             case '+':
-                memArray[dataPtr]++;
+                ctx->memArray[ctx->dataPtr]++;
                 break;
             case '-':
-                memArray[dataPtr]--;
+                ctx->memArray[ctx->dataPtr]--;
                 break;
             case '[':
-                if (memArray[dataPtr] == 0) {
+                if (ctx->memArray[ctx->dataPtr] == 0) {
                     // Process nested loops
                     int bracketCount = 1;
                     while (bracketCount > 0) {
-                        instPtr++;
-                        if (input[instPtr] == '[') {
+                        ctx->instPtr++;
+                        if (ctx->input[ctx->instPtr] == '[') {
                             bracketCount++;
-                        } else if (input[instPtr] == ']') {
+                        } else if (ctx->input[ctx->instPtr] == ']') {
                             bracketCount--;
                         }
                     }
                 }
                 break;
             case ']':
-                if (memArray[dataPtr] != 0) {
+                if (ctx->memArray[ctx->dataPtr] != 0) {
                     // Process nested loops
                     int bracketCount = 1;
                     while (bracketCount > 0) {
-                        instPtr--;
-                        if (input[instPtr] == ']') {
+                        ctx->instPtr--;
+                        if (ctx->input[ctx->instPtr] == ']') {
                             bracketCount++;
-                        } else if (input[instPtr] == '[') {
+                        } else if (ctx->input[ctx->instPtr] == '[') {
                             bracketCount--;
                         }
                     }
@@ -99,39 +109,34 @@ int main(int argc, char **argv) {
             case '.': {
                 // Assign value to output
                 int len;
-                len = strlen(output);
-                output[len] = memArray[dataPtr];
-                output[len + 1] = '\0';
+                len = strlen(ctx->output);
+                ctx->output[len] = ctx->memArray[ctx->dataPtr];
+                ctx->output[len + 1] = '\0';
                 break;
             }
             case ',':
-                memArray[dataPtr] = getchar();
+                int ch = getchar();
+                if (ch != EOF) {
+                    ctx->memArray[ctx->dataPtr] = ch;
+                }
                 break;
         }
 
         // Next instruction
-        instPtr++;
+        ctx->instPtr++;
     }
-
-    // Print output
-    printf("%s", output);
-    RunRenderer(input, memArray, maxDataPtr + 1, output);
-    return 0;
 }
 
 void InitRenderer(void) {
     SetTraceLogLevel(LOG_ERROR); // print only error log
+    //SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "braintercourse  -  Brainfuck Interpreter Visualizer");
     SetTargetFPS(SCREEN_FPS);
 }
 
-void RunRenderer(char *input, char memArray[], int memLength, char *output) {
-    // Custom colors
-    // Color cellColor = (Color){247, 114, 69, 255};
-    // Color bgColor = (Color){238, 230, 212, 255};
-
+void RunRenderer(InterpreterContext *ctx) {
     // Get input length
-    size_t inputLength = strlen(input);
+    size_t inputLength = strlen(ctx->input);
 
     Rectangle tgt = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 2, 2};
 
@@ -182,7 +187,7 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
                      TILE_SIZE * 7 - TILE_SIZE / 2, INDEX_FONT_SIZE, DARKGRAY);
 
             // Get input array values
-            const char *inputValueStr = TextFormat("%c", (int) input[i]);
+            const char *inputValueStr = TextFormat("%c", (int) ctx->input[i]);
             Vector2 inputValueSize = MeasureTextEx(GetFontDefault(), inputValueStr, VALUE_FONT_SIZE, 1);
 
             // Center value in each cell
@@ -200,7 +205,7 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
         //----------------------------------------------------------------------------------
 
         // Draw memory array
-        for (int i = 0; i < memLength; i++) {
+        for (int i = 0; i < ctx->maxDataPtr + 1; i++) {
             // Draw cells
             DrawRectangle(SCREEN_WIDTH / 4 + SQUARE_SIZE * i, SCREEN_HEIGHT / 2 - TILE_SIZE, SQUARE_SIZE, SQUARE_SIZE,
                           CELL_COLOR);
@@ -214,7 +219,7 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
                      DARKGRAY);
 
             // Get memory array values
-            const char *memValueStr = TextFormat("%d", (int) memArray[i]);
+            const char *memValueStr = TextFormat("%d", (int) ctx->memArray[i]);
             Vector2 memoryValueSize = MeasureTextEx(GetFontDefault(), memValueStr, VALUE_FONT_SIZE, 1);
 
             // Center value in each cell
@@ -227,24 +232,21 @@ void RunRenderer(char *input, char memArray[], int memLength, char *output) {
                      (Vector2){SCREEN_WIDTH / 4.0f + 20.0f, SCREEN_HEIGHT / 2 + TILE_SIZE * 3 + TRIANGLE_SIZE},
                      (Vector2){SCREEN_WIDTH / 4.0f + 60.0f, SCREEN_HEIGHT / 2 + TILE_SIZE * 3 + TRIANGLE_SIZE}, RED);
 
-
-        DrawText(output, SQUARE_SIZE * 4 + SQUARE_SIZE / 2,SCREEN_HEIGHT - SQUARE_SIZE * 2 + SQUARE_SIZE / 2,
-                 VALUE_FONT_SIZE, BLACK);
-
         EndMode2D();
 
-        //SCREEN_WIDTH / 2 - (inputTextSize.x / 2), TILE_SIZE
+        DrawText(ctx->output, SQUARE_SIZE * 4 + SQUARE_SIZE / 2,SCREEN_HEIGHT - SQUARE_SIZE * 2 + SQUARE_SIZE / 2,
+                 VALUE_FONT_SIZE, BLACK);
 
         DrawLine(SQUARE_SIZE, SQUARE_SIZE - TILE_SIZE * 2 + TILE_SIZE / 2,
                  SCREEN_WIDTH - SQUARE_SIZE, SQUARE_SIZE - TILE_SIZE * 2 + TILE_SIZE / 2, BLACK);
 
-        DrawRectangle(SCREEN_WIDTH / 2 - 40,SQUARE_SIZE- TILE_SIZE * 2, 80, 30, BG_COLOR);
+        DrawRectangle(SCREEN_WIDTH / 2 - 40,SQUARE_SIZE - TILE_SIZE * 2, 80, 30, BG_COLOR);
 
 
-        DrawLine(SQUARE_SIZE, SQUARE_SIZE * 4 - TILE_SIZE * 3+ TILE_SIZE / 2,
+        DrawLine(SQUARE_SIZE, SQUARE_SIZE * 4 - TILE_SIZE * 3 + TILE_SIZE / 2,
                  SCREEN_WIDTH - SQUARE_SIZE, SQUARE_SIZE * 4 - TILE_SIZE * 3 + TILE_SIZE / 2, BLACK);
 
-        DrawRectangle(SCREEN_WIDTH / 2 - 100,SCREEN_HEIGHT / 2 - TILE_SIZE * 3, 200, 30, BG_COLOR);
+        DrawRectangle(SCREEN_WIDTH / 2 - 90,SCREEN_HEIGHT / 2 - TILE_SIZE * 3, 180, 30, BG_COLOR);
 
         // Draw input text
         const char *inputText = "Input";
