@@ -2,7 +2,6 @@
 #include "../include/renderer.h"
 
 int main(int argc, char **argv) {
-
     // Initialize context struct values
     InterpreterContext ctx;
     memset(ctx.memArray, 0, sizeof(ctx.memArray));

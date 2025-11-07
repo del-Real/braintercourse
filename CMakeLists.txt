@@ -29,12 +29,11 @@ endif()
 add_executable(braintercourse
         src/interpreter.c
         src/renderer.c
-        include/interpreter.h
         src/raygui_impl.c
+        include/interpreter.h
         include/raygui.h
         include/renderer.h
         include/renderer_config.h
-        src/raygui_impl.c
 )
 
 # Link raylib to your executable
