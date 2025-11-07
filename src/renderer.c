@@ -13,14 +13,38 @@ void RunRenderer(InterpreterContext *ctx) {
     // Get input length
     size_t inputLength = strlen(ctx->input);
 
-    Rectangle tgt = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 2, 2};
+    Rectangle topCameraTarget = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 2, 2};
+    Rectangle bottomCameraTarget = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 2, 2};
 
     // Camera init
-    Camera2D camera = {tgt.x, tgt.y};
-    //camera.target = (Vector2){0};
-    camera.offset = (Vector2){SCREEN_WIDTH / 2.0f + SCREEN_OFFSET, SCREEN_HEIGHT / 2.0f + SCREEN_OFFSET};
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
+    // Camera2D camera = {tgt.x, tgt.y};
+    // //camera.target = (Vector2){0};
+    // camera.offset = (Vector2){SCREEN_WIDTH / 2.0f + SCREEN_OFFSET, SCREEN_HEIGHT / 2.0f + SCREEN_OFFSET};
+    // camera.rotation = 0.0f;
+    // camera.zoom = 1.0f;
+
+    Camera2D topCamera = {0};
+    topCamera.target = (Vector2){topCameraTarget.x, topCameraTarget.y};
+    topCamera.offset = (Vector2){SCREEN_WIDTH / 2.0f + SCREEN_OFFSET, SCREEN_HEIGHT / 2.0f + SCREEN_OFFSET};
+    topCamera.rotation = 0.0f;
+    topCamera.zoom = 1.0f;
+
+    Camera2D bottomCamera = {0};
+    bottomCamera.target = (Vector2){bottomCameraTarget.x, bottomCameraTarget.y};
+    bottomCamera.offset = (Vector2){SCREEN_WIDTH / 2.0f + SCREEN_OFFSET, SCREEN_HEIGHT / 2.0f + SCREEN_OFFSET};
+    bottomCamera.rotation = 0.0f;
+    bottomCamera.zoom = 1.0f;
+
+    RenderTexture topCameraScreen = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT/2);
+    RenderTexture bottomCameraScreen = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT/2);
+
+    // Build a flipped rectangle the size of the split view to use for drawing later
+    Rectangle splitScreenRect = {
+        0.0f, 0.0f,
+        (float) topCameraScreen.texture.width,
+        (float) -bottomCameraScreen.texture.height
+    };
+
 
     //----------------------------------------------------------------------------------
     // MAIN RENDERING LOOP
@@ -29,16 +53,18 @@ void RunRenderer(InterpreterContext *ctx) {
         // ---------------
         // CAMERA
         // ---------------
-        MoveCamera(&camera, &tgt);
+        MoveCamera(&topCamera, &topCameraTarget);
+        //MoveCamera(&bottomCamera, &bottomCameraTarget);
 
         // ---------------
         // DRAW
         // ---------------
-        BeginDrawing();
+        BeginTextureMode(topCameraScreen);
         ClearBackground(BG_COLOR);
-        BeginMode2D(camera);
 
-        DrawRectangleRec(tgt, BG_COLOR);
+        BeginMode2D(topCamera);
+
+        DrawRectangleRec(topCameraTarget, BLUE);
 
         // Draw grid
         // for (int i = 0; i < SCREEN_WIDTH / TILE_SIZE + 1; i++) {
@@ -74,6 +100,14 @@ void RunRenderer(InterpreterContext *ctx) {
         DrawTriangle((Vector2){SCREEN_WIDTH / 4.0f + 40.0f, TILE_SIZE * 7},
                      (Vector2){SCREEN_WIDTH / 4.0f + 20.0f, TILE_SIZE * 7 + TRIANGLE_SIZE},
                      (Vector2){SCREEN_WIDTH / 4.0f + 60.0f, TILE_SIZE * 7 + TRIANGLE_SIZE}, BLUE);
+
+        EndMode2D();
+        EndTextureMode();
+
+        BeginTextureMode(bottomCameraScreen);
+        ClearBackground(BG_COLOR);
+
+        BeginMode2D(bottomCamera);
 
         //----------------------------------------------------------------------------------
         // Memory Array
@@ -152,6 +186,12 @@ void RunRenderer(InterpreterContext *ctx) {
         const char *outputText = "Output";
         Vector2 outputTextSize =
                 MeasureTextEx(GetFontDefault(), outputText, TITLE_FONT_SIZE, 1);
+
+        EndMode2D();
+        EndTextureMode();
+
+        BeginDrawing();
+        ClearBackground(BG_COLOR);
 
         // Transport controls
         // ------------------
@@ -253,6 +293,9 @@ void RunRenderer(InterpreterContext *ctx) {
                       "#135#")) {
             // button clicked
         }
+        DrawTextureRec(topCameraScreen.texture, splitScreenRect, (Vector2){ 0, 0 }, WHITE);
+        DrawTextureRec(bottomCameraScreen.texture, splitScreenRect, (Vector2){ SCREEN_HEIGHT/2.0f, 0 }, WHITE);
+
         EndDrawing();
     }
     CloseWindow();
