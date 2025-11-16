@@ -31,8 +31,8 @@ void RunRenderer(InterpreterContext *ctx) {
     bottomCamera.zoom = 1.0f;
 
     // Screen render textures
-    RenderTexture topCameraScreen = LoadRenderTexture(SCREEN_WIDTH, TILE_SIZE * 9);
-    RenderTexture bottomCameraScreen = LoadRenderTexture(SCREEN_WIDTH, TILE_SIZE * 9);
+    RenderTexture topCameraScreen = LoadRenderTexture(SCREEN_WIDTH, TILE_SIZE * 8);
+    RenderTexture bottomCameraScreen = LoadRenderTexture(SCREEN_WIDTH, TILE_SIZE * 8);
 
     // Build a flipped rectangle the size of the split view to use for drawing later
     Rectangle splitScreenRect = {
@@ -84,7 +84,7 @@ void RunRenderer(InterpreterContext *ctx) {
 
         DrawText(inputText, SCREEN_WIDTH / 2 - (inputTextSize.x / 2), TILE_SIZE, TITLE_FONT_SIZE, DARKGRAY);
 
-        DrawLayoutGrid();
+        //DrawLayoutGrid();
 
         EndTextureMode();
 
@@ -120,7 +120,7 @@ void RunRenderer(InterpreterContext *ctx) {
 
         DrawText(memText, SCREEN_WIDTH / 2 - (memTextSize.x / 2), TILE_SIZE, TITLE_FONT_SIZE, DARKGRAY);
 
-        DrawLayoutGrid();
+        //DrawLayoutGrid();
 
         EndTextureMode();
 
@@ -130,7 +130,7 @@ void RunRenderer(InterpreterContext *ctx) {
 
         // Render screen textures
         DrawTextureRec(topCameraScreen.texture, splitScreenRect, (Vector2){0, 0}, WHITE);
-        DrawTextureRec(bottomCameraScreen.texture, splitScreenRect, (Vector2){0, TILE_SIZE * 9}, WHITE);
+        DrawTextureRec(bottomCameraScreen.texture, splitScreenRect, (Vector2){0, TILE_SIZE * 8}, WHITE);
 
         // Draw Input Array values
         for (int i = 0; i < inputLength; i++) {
@@ -167,9 +167,11 @@ void RunRenderer(InterpreterContext *ctx) {
         int triangleWorldX = (TILE_SIZE * 8) + 40;
         int triangleWorldY = TILE_SIZE * 7;
 
+        /*
         DrawTriangle((Vector2){triangleWorldX, triangleWorldY},
                      (Vector2){triangleWorldX - 15, triangleWorldY + 25},
                      (Vector2){triangleWorldX + 15, triangleWorldY + 25}, BLUE);
+        */
 
         // Draw Memory Array values
         for (int i = 0; i < ctx->maxDataPtr + 1; i++) {
@@ -179,14 +181,14 @@ void RunRenderer(InterpreterContext *ctx) {
 
             // Transform to screen coordinates
             int screenX = worldX - (int) bottomCamera.target.x + (int) bottomCamera.offset.x;
-            int screenY = (TILE_SIZE * 9) + worldY - (int) bottomCamera.target.y + (int) bottomCamera.offset.y;
+            int screenY = (TILE_SIZE * 8) + worldY - (int) bottomCamera.target.y + (int) bottomCamera.offset.y;
 
             // Draw indexes
             const char *indexStr = TextFormat("%i", i);
             Vector2 indexSize = MeasureTextEx(GetFontDefault(), indexStr, INDEX_FONT_SIZE, 1);
 
             int indexWorldY = TILE_SIZE * 7 - (TILE_SIZE / 2);
-            int indexScreenY = (TILE_SIZE * 9) + indexWorldY - (int) bottomCamera.target.y + (int) bottomCamera.offset.
+            int indexScreenY = (TILE_SIZE * 8) + indexWorldY - (int) bottomCamera.target.y + (int) bottomCamera.offset.
                                y;
 
             DrawText(indexStr,
@@ -205,31 +207,36 @@ void RunRenderer(InterpreterContext *ctx) {
 
         // Draw memory pointer triangle
         int memTriangleWorldX = (TILE_SIZE * 8) + 40;
-        int memTriangleWorldY = TILE_SIZE * 7;
+        int memTriangleWorldY = TILE_SIZE * 6;
 
         int memTriangleScreenX = memTriangleWorldX - (int) bottomCamera.target.x + (int) bottomCamera.offset.x;
         int memTriangleScreenY = (TILE_SIZE * 9) + memTriangleWorldY - (int) bottomCamera.target.y + (int) bottomCamera.
                                  offset.y;
 
+        /*
         DrawTriangle((Vector2){memTriangleScreenX, memTriangleScreenY},
                      (Vector2){memTriangleScreenX - 20, memTriangleScreenY + TRIANGLE_SIZE},
                      (Vector2){memTriangleScreenX + 20, memTriangleScreenY + TRIANGLE_SIZE}, RED);
+        */
 
         // Output
         //----------------------------------------------------------------------------------
         // Output header
-        DrawLine(SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE * 5 - TILE_SIZE / 2,
-                 SCREEN_WIDTH - SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE * 5 - TILE_SIZE / 2, BLACK);
+        DrawLine(SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE * 6 - TILE_SIZE / 2,
+                 SCREEN_WIDTH - SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE * 6 - TILE_SIZE / 2, BLACK);
 
         // Draw rectangle
-        DrawRectangle(SCREEN_WIDTH / 2 - TILE_SIZE * 2,SCREEN_HEIGHT - TILE_SIZE * 6,
+        DrawRectangle(SCREEN_WIDTH / 2 - TILE_SIZE * 2,SCREEN_HEIGHT - TILE_SIZE * 7,
                       TILE_SIZE * 4, TILE_SIZE, BG_COLOR);
 
         const char *outputText = "Output";
         Vector2 outputTextSize =
                 MeasureTextEx(GetFontDefault(), outputText, TITLE_FONT_SIZE, 1);
 
-        DrawText(ctx->output, SQUARE_SIZE * 4 + SQUARE_SIZE / 2,SCREEN_HEIGHT - TILE_SIZE * 4,
+        DrawText(outputText, SCREEN_WIDTH / 2 - (outputTextSize.x / 2),SCREEN_HEIGHT - TILE_SIZE * 7,
+                 TITLE_FONT_SIZE, DARKGRAY);
+
+        DrawText(ctx->output, SQUARE_SIZE * 4 + SQUARE_SIZE / 2,SCREEN_HEIGHT - TILE_SIZE * 5,
                  VALUE_FONT_SIZE, BLACK);
 
         // Transport controls
@@ -237,12 +244,9 @@ void RunRenderer(InterpreterContext *ctx) {
         DrawLine(SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE - TILE_SIZE / 2,
                  SCREEN_WIDTH - SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE - TILE_SIZE / 2, BLACK);
 
-        DrawText(outputText, SCREEN_WIDTH / 2 - (outputTextSize.x / 2),SCREEN_HEIGHT - TILE_SIZE * 6,
-                 TITLE_FONT_SIZE, DARKGRAY);
+        //DrawControlButtons();
 
-        DrawControlButtons();
-
-        DrawLayoutGrid();
+        //DrawLayoutGrid();
 
         EndDrawing();
     }
@@ -372,7 +376,7 @@ void DrawLayoutGrid() {
     //Draw grid
     for (int i = 0; i < SCREEN_WIDTH / TILE_SIZE + 1; i++) {
         for (int j = 0; j < SCREEN_HEIGHT / TILE_SIZE + 1; j++) {
-            DrawRectangleLines(i * TILE_SIZE, j * TILE_SIZE,TILE_SIZE, TILE_SIZE, LIGHTGRAY);
+            DrawRectangleLines(i * TILE_SIZE, j * TILE_SIZE,TILE_SIZE, TILE_SIZE, GREEN);
         }
     }
 }
