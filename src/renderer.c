@@ -13,7 +13,7 @@ void RunRenderer(InterpreterContext *ctx) {
     // Get input length
     size_t inputLength = strlen(ctx->input);
 
-    // Camera targets
+    // Cameras target
     Rectangle topCameraTarget = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 2, 2};
     Rectangle bottomCameraTarget = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 2, 2};
 
@@ -34,12 +34,14 @@ void RunRenderer(InterpreterContext *ctx) {
     RenderTexture topCameraScreen = LoadRenderTexture(SCREEN_WIDTH, TILE_SIZE * 8);
     RenderTexture bottomCameraScreen = LoadRenderTexture(SCREEN_WIDTH, TILE_SIZE * 8);
 
-    // Build a flipped rectangle the size of the split view to use for drawing later
+    // Flipped rectangle with size of the split view
     Rectangle splitScreenRect = {
         0.0f, 0.0f,
         (float) topCameraScreen.texture.width,
         (float) -bottomCameraScreen.texture.height
     };
+
+    float middlePosX = TILE_SIZE * (MAX_TILES_WIDTH / 2) - (SQUARE_SIZE / 2);
 
     //==================================================================================
     // MAIN RENDERING LOOP
@@ -65,8 +67,8 @@ void RunRenderer(InterpreterContext *ctx) {
         // Draw input array
         for (int i = 0; i < inputLength; i++) {
             // Draw cells
-            DrawRectangle((TILE_SIZE * 8) + SQUARE_SIZE * i, TILE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE, CELL_COLOR);
-            DrawRectangleLines((TILE_SIZE * 8) + SQUARE_SIZE * i, TILE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE, BG_COLOR);
+            DrawRectangle(middlePosX + SQUARE_SIZE * i, TILE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE, CELL_COLOR);
+            DrawRectangleLines(middlePosX + SQUARE_SIZE * i, TILE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE, BG_COLOR);
         }
         EndMode2D();
 
@@ -84,6 +86,12 @@ void RunRenderer(InterpreterContext *ctx) {
 
         DrawText(inputText, SCREEN_WIDTH / 2 - (inputTextSize.x / 2), TILE_SIZE, TITLE_FONT_SIZE, DARKGRAY);
 
+        // Input square frame
+        Rectangle inputRect = {
+            middlePosX,TILE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE
+        };
+        DrawRectangleLinesEx(inputRect, RECTANGLE_THICK, BLACK);
+
         //DrawLayoutGrid();
 
         EndTextureMode();
@@ -99,9 +107,9 @@ void RunRenderer(InterpreterContext *ctx) {
         // Draw memory array
         for (int i = 0; i < ctx->maxDataPtr + 1; i++) {
             // Draw cells
-            DrawRectangle((TILE_SIZE * 8) + SQUARE_SIZE * i, TILE_SIZE * 3,
+            DrawRectangle(middlePosX + SQUARE_SIZE * i, TILE_SIZE * 3,
                           SQUARE_SIZE, SQUARE_SIZE, CELL_COLOR);
-            DrawRectangleLines((TILE_SIZE * 8) + SQUARE_SIZE * i, TILE_SIZE * 3,
+            DrawRectangleLines(middlePosX + SQUARE_SIZE * i, TILE_SIZE * 3,
                                SQUARE_SIZE, SQUARE_SIZE, BG_COLOR);
         }
 
@@ -120,6 +128,12 @@ void RunRenderer(InterpreterContext *ctx) {
 
         DrawText(memText, SCREEN_WIDTH / 2 - (memTextSize.x / 2), TILE_SIZE, TITLE_FONT_SIZE, DARKGRAY);
 
+        // Memory array square frame
+        Rectangle memArrayRect = {
+            middlePosX,TILE_SIZE * 3, SQUARE_SIZE, SQUARE_SIZE
+        };
+        DrawRectangleLinesEx(memArrayRect, RECTANGLE_THICK, BLACK);
+
         //DrawLayoutGrid();
 
         EndTextureMode();
@@ -135,7 +149,7 @@ void RunRenderer(InterpreterContext *ctx) {
         // Draw Input Array values
         for (int i = 0; i < inputLength; i++) {
             // Apply camera offset transformation
-            int worldX = (TILE_SIZE * 8) + SQUARE_SIZE * i;
+            int worldX = middlePosX + SQUARE_SIZE * i;
             int worldY = TILE_SIZE * 3;
 
             // Transform to screen coordinates
@@ -163,20 +177,10 @@ void RunRenderer(InterpreterContext *ctx) {
                      VALUE_FONT_SIZE, BLACK);
         }
 
-        // Draw input pointer triangle
-        int triangleWorldX = (TILE_SIZE * 8) + 40;
-        int triangleWorldY = TILE_SIZE * 7;
-
-        /*
-        DrawTriangle((Vector2){triangleWorldX, triangleWorldY},
-                     (Vector2){triangleWorldX - 15, triangleWorldY + 25},
-                     (Vector2){triangleWorldX + 15, triangleWorldY + 25}, BLUE);
-        */
-
         // Draw Memory Array values
         for (int i = 0; i < ctx->maxDataPtr + 1; i++) {
             // Apply camera offset transformation
-            int worldX = (TILE_SIZE * 8) + SQUARE_SIZE * i;
+            int worldX = middlePosX + SQUARE_SIZE * i;
             int worldY = TILE_SIZE * 3;
 
             // Transform to screen coordinates
@@ -205,20 +209,6 @@ void RunRenderer(InterpreterContext *ctx) {
                      VALUE_FONT_SIZE, BLACK);
         }
 
-        // Draw memory pointer triangle
-        int memTriangleWorldX = (TILE_SIZE * 8) + 40;
-        int memTriangleWorldY = TILE_SIZE * 6;
-
-        int memTriangleScreenX = memTriangleWorldX - (int) bottomCamera.target.x + (int) bottomCamera.offset.x;
-        int memTriangleScreenY = (TILE_SIZE * 9) + memTriangleWorldY - (int) bottomCamera.target.y + (int) bottomCamera.
-                                 offset.y;
-
-        /*
-        DrawTriangle((Vector2){memTriangleScreenX, memTriangleScreenY},
-                     (Vector2){memTriangleScreenX - 20, memTriangleScreenY + TRIANGLE_SIZE},
-                     (Vector2){memTriangleScreenX + 20, memTriangleScreenY + TRIANGLE_SIZE}, RED);
-        */
-
         // Output
         //----------------------------------------------------------------------------------
         // Output header
@@ -244,7 +234,7 @@ void RunRenderer(InterpreterContext *ctx) {
         DrawLine(SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE - TILE_SIZE / 2,
                  SCREEN_WIDTH - SQUARE_SIZE, SCREEN_HEIGHT - TILE_SIZE - TILE_SIZE / 2, BLACK);
 
-        //DrawControlButtons();
+        DrawControlButtons();
 
         //DrawLayoutGrid();
 
